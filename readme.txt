@@ -18,8 +18,6 @@ EasyBan offers a userfriendly interface for doing just that. Set a permanent or 
 * Blocks persons (or domains) with a hostname or IP address from your site
 * Shows a nice template
 
-And more, see for yourself...
-
 == Installation ==
 
 = Quick start =
@@ -30,7 +28,7 @@ Activate from the plugins page and manage bans from the manage > banned page.
 == Frequently Asked Questions ==
 
 Visit here for the FAQ and support:
-[Events support page](http://meandmymac.net/contact-and-support/easyban/)
+[EasyBan support page](http://meandmymac.net/contact-and-support/easyban/)
 
 == Screenshots ==
 
