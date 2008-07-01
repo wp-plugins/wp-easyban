@@ -22,8 +22,10 @@ EasyBan offers a userfriendly interface for doing just that. Set a permanent or 
 
 = Quick start =
 
-Unzip the file and upload it to your /wp-content/plugins/ folder.
-Activate from the plugins page and manage bans from the manage > banned page.
+1. Unzip the file and upload it to your /wp-content/plugins/ folder.
+1. Activate from the plugins page and manage bans from the manage > banned page.
+
+[Additional information](http://meandmymac.net/plugins/easyban/#install)
 
 == Frequently Asked Questions ==
 
@@ -32,4 +34,4 @@ Visit here for the FAQ and support:
 
 == Screenshots ==
 
-N/a
+[Screenshots](http://meandmymac.net/plugins/easyban/#screens)
