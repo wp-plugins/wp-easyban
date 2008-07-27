@@ -3,7 +3,7 @@ Contributors: Arnan de Gans
 Donate link: http://meandmymac.net/donate/
 Tags: banned, ban, admin, redirect, referrer, blocked, ip, hostname
 Requires at least: 2.5
-Tested up to: 2.5.1
+Tested up to: 2.6
 Stable tag: 1.2.3.1
 
 Want to ban persons by their IP? Block hostnames? Or even referral links?
@@ -30,7 +30,7 @@ EasyBan offers a userfriendly interface for doing just that. Set a permanent or 
 == Frequently Asked Questions ==
 
 Visit here for the FAQ and support:
-[EasyBan support page](http://meandmymac.net/contact-and-support/easyban/)
+[EasyBan support page](http://forum.at.meandmymac.net/)
 
 == Screenshots ==
 
