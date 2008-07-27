@@ -30,7 +30,7 @@ EasyBan offers a userfriendly interface for doing just that. Set a permanent or 
 == Frequently Asked Questions ==
 
 Visit here for the FAQ and support:
-[EasyBan support page](http://meandmymac.net/contact-and-support/easyban/)
+[EasyBan support page](http://forum.at.meandmymac.net/)
 
 == Screenshots ==
 
