@@ -4,7 +4,7 @@ Plugin Name: EasyBan
 Plugin URI: http://meandmymac.net/plugins/easyban/
 Description: Advanced blocking and banning of visitors. Use this plugin to make a website private or block IP addresses, hostnames, domains and extensions from both visitors and referers. 
 Author: Arnan de Gans
-Version: 1.2.3.1
+Version: 1.3.1
 Author URI: http://meandmymac.net/
 */
 
@@ -19,7 +19,7 @@ easyban_check_config();
 # ---------------------------------------------------
 if (easyban_mysql_table_exists()) {
 
-	add_action('admin_menu', 'easyban_add_pages'); //Add page menu links
+	add_action('admin_menu', 'easyban_add_pages', 1); //Add page menu links
 	add_action('template_redirect', 'easyban_header'); // Check if banned or logged in and redirect if needed
 
  	if($easyban_config['length'] == "on") {
@@ -38,7 +38,7 @@ if (easyban_mysql_table_exists()) {
 	if ( isset($_POST['easyban_uninstall']) )
 		add_action('init', 'easyban_plugin_uninstall'); //Uninstall
 
-	// Load Options
+	// Load Options fetch remote information
 	$easyban_config = get_option('easyban_config');
 	$easyban_scriptname = basename(__FILE__);
 	if(empty($_SERVER["HTTP_X_FORWARDED_FOR"])) {
@@ -228,7 +228,7 @@ function easyban_insert_input() {
 				$address 	= strtolower($address);
 				$range		= strtolower($address);
 			} else {
-				wp_redirect('edit.php?page=wp-easyban.php&false_return=true&reason=t');			
+				wp_redirect('edit.php?page=wp-easyban2&false_return=true&reason=t');			
 			}
 		
 			$postquery = "INSERT INTO
@@ -238,16 +238,16 @@ function easyban_insert_input() {
 			('$address', '$range', '$reason', '$redirect', '".date("U")."', '$timespan')
 			";
 			if($wpdb->query($postquery)) {
-				wp_redirect('edit.php?page=wp-easyban.php&new_return=true');
+				wp_redirect('edit.php?page=wp-easyban3&new_return=true');
 			} else {
 				die(mysql_error());
 			}
 		} else {
-			wp_redirect('edit.php?page=wp-easyban.php&false_return=true&reason=r');
+			wp_redirect('edit.php?page=wp-easyban2&false_return=true&reason=r');
 		}
 
 	} else {
-		wp_redirect('edit.php?page=wp-easyban.php&false_return=true&reason=f');			
+		wp_redirect('edit.php?page=wp-easyban2&false_return=true&reason=f');			
 	}
 }
 
@@ -277,7 +277,7 @@ function easyban_request_delete() {
 
 		if ($userdata->user_level >= 10) {
 			if(easyban_delete_banid($ban_id) == TRUE) {
-				wp_redirect('edit.php?page=wp-easyban.php&deleted_return=true');
+				wp_redirect('edit.php?page=wp-easyban&deleted_return=true');
 			} else {
 				die(mysql_error());
 			}
@@ -313,8 +313,9 @@ function easyban_delete_banid ($ban_id) {
  Return:    -none-
 ------------------------------------------------------------- */
 function easyban_add_pages() {
-	add_management_page('Bans', 'Bans', 10, basename(__FILE__), 'easyban_manage_page');
-	add_options_page('Bans', 'Bans', 10, basename(__FILE__), 'easyban_options_page');
+	add_submenu_page('edit.php', 'EasyBan > Add', 'Add Ban', 'manage_options', 'wp-easyban', 'easyban_add_page');
+	add_submenu_page('plugins.php', 'EasyBan > Manage', 'Manage Bans', 'manage_options', 'wp-easyban2', 'easyban_manage_page');
+	add_submenu_page('options-general.php', 'EasyBan > Settings', 'EasyBan', 'manage_options', 'wp-easyban3', 'easyban_options_page');
 }
 
 /* -------------------------------------------------------------
@@ -334,15 +335,6 @@ function easyban_manage_page() {
 	<?php if ($_GET['deleted_return'] == "true") : ?>
 		<div id="message" class="updated fade"><p><?php _e('Ban <strong>deleted</strong>.') ?></p>
 		</div>
-	<?php endif; ?>
-	<?php if ($_GET['false_return'] == "true") : ?>
-		<?php if ($_GET['reason'] == "t") { ?>
-			<div id="message" class="updated fade"><p><?php _e('Ban could <strong>not</strong> be added. No banning method selected!') ?></p></div>
-		<?php } else if ($_GET['reason'] == "f") { ?>
-			<div id="message" class="updated fade"><p><?php _e('Ban could <strong>not</strong> be added. Not all fields matched the criteria!') ?></p></div>
-		<?php } else if ($_GET['reason'] == "r") { ?>
-			<div id="message" class="updated fade"><p><?php _e('Ban could <strong>not</strong> be added. You cannot block yourself, 127.0.0.1 or localhost!') ?></p></div>
-		<?php } ?>
 	<?php endif; ?>
 
 	<div class="wrap">
@@ -380,16 +372,40 @@ function easyban_manage_page() {
 					<td><?php echo $ban->redirect; ?></td>
 					<td><?php echo date("M d, Y H:i", $ban->thetime); ?></td>
 					<td><?php if($ban->timespan > 0) {echo date("M d, Y H:i", $ban->timespan); } else { echo 'Never'; } ?></td>
-					<td><a href="<?php echo get_option('home').'/wp-admin/edit.php?page=wp-easyban.php&amp;delete_ban='.$ban->id;?>" class="delete" onclick="return confirm('You are about to delete this ban \'<?php echo $ban->address;?>\'\n  \'OK\' to delete, \'Cancel\' to stop.')">Delete</a></td>
+					<td><a href="<?php echo get_option('home').'/wp-admin/edit.php?page=wp-easyban&amp;delete_ban='.$ban->id;?>" class="delete" onclick="return confirm('You are about to delete this ban \'<?php echo $ban->address;?>\'\n  \'OK\' to delete, \'Cancel\' to stop.')">Delete</a></td>
 			  	</tr>
 			<?php }
 		 } else { ?>
 			<tr><td colspan="6">No bans set.</td></tr>
 		<?php }	?>
 		</table>
+	</div>
+<?php
+}
 
+/* -------------------------------------------------------------
+ Name:      easyban_add_page
+
+ Purpose:   Add a ban
+ Receive:   -none-
+ Return:    -none-
+------------------------------------------------------------- */
+function easyban_add_page() {
+	global $wpdb, $easyban_config, $easyban_remote_ip;
+
+	if ($_GET['false_return'] == "true") : ?>
+		<?php if ($_GET['reason'] == "t") { ?>
+			<div id="message" class="updated fade"><p><?php _e('Ban could <strong>not</strong> be added. No banning method selected!') ?></p></div>
+		<?php } else if ($_GET['reason'] == "f") { ?>
+			<div id="message" class="updated fade"><p><?php _e('Ban could <strong>not</strong> be added. Not all fields matched the criteria!') ?></p></div>
+		<?php } else if ($_GET['reason'] == "r") { ?>
+			<div id="message" class="updated fade"><p><?php _e('Ban could <strong>not</strong> be added. You cannot block yourself, 127.0.0.1 or localhost!') ?></p></div>
+		<?php } ?>
+	<?php endif; ?>
+
+	<div class="wrap">
 		<h2>Add ban</h2>
-	  	<form method="post" action="edit.php?page=wp-easyban.php&amp;new=true">
+	  	<form method="post" action="admin.php?page=wp-easyban&amp;new=true">
 	    	<input type="hidden" name="easyban_submit" value="true" />
 	    	<table class="form-table">
 		      	<tr valign="top">
@@ -503,13 +519,19 @@ function easyban_options_page() {
 		</form>
 
 	  	<h2>Uninstall EasyBan</h2>
-	  	<p>Banned installs a table in MySQL. When you disable the plugin the table will not be deleted. To delete the table use the button below.</p>
-	  	<p><b>WARNING!</b> -- This process is irreversible and will delete ALL active bans!</p>
-	  	<p>No other parts of your wordpress installation will be touched.</p>
 	  	<form method="post" action="<?php echo $_SERVER['REQUEST_URI']?>">
+		    <table class="form-table">
+				<tr valign="top">
+					<td colspan="2" bgcolor="#DDD">Banned installs a table in MySQL. When you disable the plugin the table will not be deleted. To delete the table use the button below.</td>
+				</tr>
+		      	<tr valign="top">
+			        <th scope="row">WARNING!</th>
+			        <td><b style="color: #f00;">This process is irreversible and will delete ALL bans!</b></td>
+				</tr>
+			</table>
 	  		<p class="submit">
-	    	<input type="hidden" name="easyban_uninstall" value="true" />
-	    	<input onclick="return confirm('You are about to uninstall the easyban plugin. All bans will be lost!\n\'OK\' to continue, \'Cancel\' to stop.')" type="submit" name="Submit" value="Uninstall Plugin &raquo;" />
+		    	<input type="hidden" name="event_uninstall" value="true" />
+		    	<input onclick="return confirm('You are about to uninstall the events plugin\n  All scheduled events will be lost!\n\'OK\' to continue, \'Cancel\' to stop.')" type="submit" name="Submit" value="Uninstall Plugin &raquo;" />
 	  		</p>
 	  	</form>
 

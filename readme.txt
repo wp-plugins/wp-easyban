@@ -2,9 +2,9 @@
 Contributors: Arnan de Gans
 Donate link: http://meandmymac.net/donate/
 Tags: banned, ban, admin, redirect, referrer, blocked, ip, hostname
-Requires at least: 2.5
-Tested up to: 2.6
-Stable tag: 1.2.3.1
+Requires at least: 2.7
+Tested up to: 2.7
+Stable tag: 1.3.1
 
 Want to ban persons by their IP? Block hostnames? Or even referral links?
 
