@@ -4,7 +4,7 @@ Plugin Name: EasyBan
 Plugin URI: http://meandmymac.net/plugins/easyban/
 Description: Advanced blocking and banning of visitors. Use this plugin to make a website private or block IP addresses, hostnames, domains and extensions from both visitors and referers. 
 Author: Arnan de Gans
-Version: 1.3.1
+Version: 1.3.2
 Author URI: http://meandmymac.net/
 */
 
@@ -19,7 +19,7 @@ easyban_check_config();
 # ---------------------------------------------------
 if (easyban_mysql_table_exists()) {
 
-	add_action('admin_menu', 'easyban_add_pages', 1); //Add page menu links
+	add_action('admin_menu', 'easyban_dashboard', 1); //Add page menu links
 	add_action('template_redirect', 'easyban_header'); // Check if banned or logged in and redirect if needed
 
  	if($easyban_config['length'] == "on") {
@@ -50,7 +50,6 @@ if (easyban_mysql_table_exists()) {
 	// Install table if not existing
 	easyban_mysql_install();
 }
-
 
 /* -------------------------------------------------------------
  Name:      easyban_mysql_install
@@ -211,7 +210,7 @@ function easyban_insert_input() {
 			$timespan = 0;
 		}
 
-		$reserved = array("127.0.0.1","localhost",$easyban_remote_ip);
+		$reserved = array("127.0.0.1", "0.0.0.0", "localhost", "::1", $easyban_remote_ip);
 
 		if(!in_array(strtolower($address), $reserved) AND !in_array(strtolower($range), $reserved)) {		
 			if($type == "range") {
@@ -228,7 +227,7 @@ function easyban_insert_input() {
 				$address 	= strtolower($address);
 				$range		= strtolower($address);
 			} else {
-				wp_redirect('edit.php?page=wp-easyban2&false_return=true&reason=t');			
+				wp_redirect('edit.php?page=wp-easyban&false_return=true&reason=t');			
 			}
 		
 			$postquery = "INSERT INTO
@@ -238,16 +237,16 @@ function easyban_insert_input() {
 			('$address', '$range', '$reason', '$redirect', '".date("U")."', '$timespan')
 			";
 			if($wpdb->query($postquery)) {
-				wp_redirect('edit.php?page=wp-easyban3&new_return=true');
+				wp_redirect('plugins.php?page=wp-easyban2&new_return=true');
 			} else {
 				die(mysql_error());
 			}
 		} else {
-			wp_redirect('edit.php?page=wp-easyban2&false_return=true&reason=r');
+			wp_redirect('edit.php?page=wp-easyban&false_return=true&reason=r');
 		}
 
 	} else {
-		wp_redirect('edit.php?page=wp-easyban2&false_return=true&reason=f');			
+		wp_redirect('edit.php?page=wp-easyban&false_return=true&reason=f');			
 	}
 }
 
@@ -277,7 +276,7 @@ function easyban_request_delete() {
 
 		if ($userdata->user_level >= 10) {
 			if(easyban_delete_banid($ban_id) == TRUE) {
-				wp_redirect('edit.php?page=wp-easyban&deleted_return=true');
+				wp_redirect('plugins.php?page=wp-easyban2&deleted_return=true');
 			} else {
 				die(mysql_error());
 			}
@@ -306,26 +305,26 @@ function easyban_delete_banid ($ban_id) {
 }
 
 /* -------------------------------------------------------------
- Name:      easyban_add_pages
+ Name:      easyban_dashboard
 
  Purpose:   Add pages to admin menus
  Receive:   -none-
  Return:    -none-
 ------------------------------------------------------------- */
-function easyban_add_pages() {
-	add_submenu_page('edit.php', 'EasyBan > Add', 'Add Ban', 'manage_options', 'wp-easyban', 'easyban_add_page');
-	add_submenu_page('plugins.php', 'EasyBan > Manage', 'Manage Bans', 'manage_options', 'wp-easyban2', 'easyban_manage_page');
-	add_submenu_page('options-general.php', 'EasyBan > Settings', 'EasyBan', 'manage_options', 'wp-easyban3', 'easyban_options_page');
+function easyban_dashboard() {
+	add_submenu_page('edit.php', 'EasyBan > Add', 'Add Ban', 'manage_options', 'wp-easyban', 'easyban_dashboard_add');
+	add_submenu_page('plugins.php', 'EasyBan > Manage', 'Manage Bans', 'manage_options', 'wp-easyban2', 'easyban_dashboard_manage');
+	add_submenu_page('options-general.php', 'EasyBan > Settings', 'EasyBan', 'manage_options', 'wp-easyban3', 'easyban_dashboard_options');
 }
 
 /* -------------------------------------------------------------
- Name:      easyban_manage_page
+ Name:      easyban_dashboard_manage
 
  Purpose:   Admin management page
  Receive:   -none-
  Return:    -none-
 ------------------------------------------------------------- */
-function easyban_manage_page() {
+function easyban_dashboard_manage() {
 	global $wpdb, $easyban_config, $easyban_remote_ip;
 
 	if ($_GET['new_return'] == "true") : ?>
@@ -372,7 +371,7 @@ function easyban_manage_page() {
 					<td><?php echo $ban->redirect; ?></td>
 					<td><?php echo date("M d, Y H:i", $ban->thetime); ?></td>
 					<td><?php if($ban->timespan > 0) {echo date("M d, Y H:i", $ban->timespan); } else { echo 'Never'; } ?></td>
-					<td><a href="<?php echo get_option('home').'/wp-admin/edit.php?page=wp-easyban&amp;delete_ban='.$ban->id;?>" class="delete" onclick="return confirm('You are about to delete this ban \'<?php echo $ban->address;?>\'\n  \'OK\' to delete, \'Cancel\' to stop.')">Delete</a></td>
+					<td><a href="<?php echo get_option('home').'/wp-admin/plugins.php?page=wp-easyban2&amp;delete_ban='.$ban->id;?>" class="delete" onclick="return confirm('You are about to delete this ban \'<?php echo $ban->address;?>\'\n  \'OK\' to delete, \'Cancel\' to stop.')">Delete</a></td>
 			  	</tr>
 			<?php }
 		 } else { ?>
@@ -384,13 +383,13 @@ function easyban_manage_page() {
 }
 
 /* -------------------------------------------------------------
- Name:      easyban_add_page
+ Name:      easyban_dashboard_add
 
  Purpose:   Add a ban
  Receive:   -none-
  Return:    -none-
 ------------------------------------------------------------- */
-function easyban_add_page() {
+function easyban_dashboard_add() {
 	global $wpdb, $easyban_config, $easyban_remote_ip;
 
 	if ($_GET['false_return'] == "true") : ?>
@@ -399,13 +398,13 @@ function easyban_add_page() {
 		<?php } else if ($_GET['reason'] == "f") { ?>
 			<div id="message" class="updated fade"><p><?php _e('Ban could <strong>not</strong> be added. Not all fields matched the criteria!') ?></p></div>
 		<?php } else if ($_GET['reason'] == "r") { ?>
-			<div id="message" class="updated fade"><p><?php _e('Ban could <strong>not</strong> be added. You cannot block yourself, 127.0.0.1 or localhost!') ?></p></div>
+			<div id="message" class="updated fade"><p><?php _e('Ban could <strong>not</strong> be added. You cannot block yourself, 127.0.0.1, ::1 or localhost!') ?></p></div>
 		<?php } ?>
 	<?php endif; ?>
 
 	<div class="wrap">
 		<h2>Add ban</h2>
-	  	<form method="post" action="admin.php?page=wp-easyban&amp;new=true">
+	  	<form method="post" action="edit.php?page=wp-easyban&amp;new=true">
 	    	<input type="hidden" name="easyban_submit" value="true" />
 	    	<table class="form-table">
 		      	<tr valign="top">
@@ -452,8 +451,8 @@ function easyban_add_page() {
 						- An IP address <strong>always</strong> contains 4 parts with numbers no higher than 254 separated by a dot!<br />
 						- If a ban does not seem to work try to find out if the person you're trying to ban doesn't use <a href="http://en.wikipedia.org/wiki/DHCP" target="_blank" title="Wikipedia - DHCP, new window">DHCP</a>.<br />
 						- A temporary ban is automatically removed when it expires.<br />
-						- To block a domain you can use keywords. Just blocking 'sothq' would work almost the same as blocking 'sothq.net'. However, when putting just 'sothq', <strong>ALL</strong> extensions are blocked!!<br />
-						- For more questions please seek help at my <a href="http://meandmymac.net/contact-and-support/easyban/" target="_blank" title="EasyBan support, new window">support pages</a>.<br />
+						- To block a domain you can use keywords. Just blocking 'meandmymac' would work almost the same as blocking 'meandmymac.net'. However, when putting just 'meandmymac', <strong>ALL</strong> extensions (.com .net .co.ck. co.uk etc.) are blocked!!<br />
+						- For more questions please seek help at my <a href="http://forum.at.meandmymac.net/" target="_blank" title="EasyBan support, new window">support pages</a>.<br />
 			        </td>
 		      	</tr>
 	    	</table>
@@ -466,13 +465,13 @@ function easyban_add_page() {
 }
 
 /* -------------------------------------------------------------
- Name:      easyban_options_page
+ Name:      easyban_dashboard_options
 
  Purpose:   Admin options page
  Receive:   -none-
  Return:    -none-
 ------------------------------------------------------------- */
-function easyban_options_page() {
+function easyban_dashboard_options() {
 	$easyban_config = get_option('easyban_config');
 ?>
 	<div class="wrap">
