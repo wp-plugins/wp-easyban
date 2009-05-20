@@ -7,10 +7,12 @@ Tested up to: 2.7
 Stable tag: 1.3.2
 
 Want to ban persons by their IP? Block hostnames? Or even referral links?
+Use AccessQontrol
 
 == Description ==
 
-EasyBan offers a userfriendly interface for doing just that. Set a permanent or temporary ban on either of the 3 types possible and thus deny access to persons or domains that are pestering your site.
+EasyBan is a discontinued thing. THe important features have been moved into AccessQontrol, another plugin of mine.
+[http://meandmymac.net/plugins/accessqontrol/](http://meandmymac.net/plugins/accessqontrol/)
 
 **Features**
 
